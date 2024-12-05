@@ -22,27 +22,33 @@ class MoviesController < ApplicationController
         
         break if movies.size < 10
       else
-        render json: { error: "Oops - Error while fetching OMDB data!" }
+        render json: { error: response.parsed_response["Error"] }
         return
       end
 
       page += 1
     end
 
-    render json: pretty_print(all_movies)
+    render json: all_movies
   end
 
-	private
+	def show
+    movie_id = params[:id]
 
-	def pretty_print movies
-    movies.map do |movie|
-      {
-        title: movie["Title"],
-        year: movie["Year"],
-        imdb_id: movie["imdbID"],
-        type: movie["Type"],
-        poster: movie["Poster"]
-      }
+    if movie_id.blank?
+      render json: { error: "The movie ID is mandatory!" }, status: :bad_request
+      return
+    end
+
+		api_key = ENV['OMDB_API_KEY']
+    response = HTTParty.get(ENDPOINT, query: { apikey: api_key, i: movie_id })
+
+    if response.success? && response.parsed_response["Response"] == "True"
+			# Pretty print - remove status of API Call
+      prettt_response = response.parsed_response.except("Response")
+      render json: prettt_response
+    else
+      render json: { error: response.parsed_response["Error"] }
     end
   end
 
