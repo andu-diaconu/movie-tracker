@@ -45,8 +45,18 @@ class MoviesController < ApplicationController
 
     if response.success? && response.parsed_response["Response"] == "True"
 			# Pretty print - remove status of API Call
-      prettt_response = response.parsed_response.except("Response")
-      render json: prettt_response
+      pretty_response = response.parsed_response.except("Response")
+
+			if request.format.pdf?
+				if params[:email].present?
+					MovieMailerJob.perform_later(params[:email], pretty_response)
+					render json: { message: "Request accepted! PDF generation starting soon..." }, status: :accepted
+				else
+					render json: { error: "The email is mandatory!" }, status: :bad_request
+				end
+			else
+				render json: pretty_response
+			end
     else
       render json: { error: response.parsed_response["Error"] }
     end
