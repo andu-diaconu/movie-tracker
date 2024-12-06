@@ -8,7 +8,7 @@ The project use these versions
 To run the app on you machine do the following:
 
 1. Clone the Repository:
-* git clone https://github.com/your-username/movie-search-api.git
+* git clone https://github.com/andu-diaconu/movie-tracker.git
 * cd movie-tracker
 
 
